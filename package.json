@@ -1,0 +1,21 @@
+{
+  "name": "websocket-reverse-proxy",
+  "version": "1.0.0",
+  "description": "Reverse-proxy server and client to organize access to a private server through requests to a public server.",
+  "main": "index.js",
+  "author": "A.I.Developer",
+  "license": "Apache-2.0",
+  "keywords": [
+    "websocket",
+    "reverse-proxy",
+    "share-private-app",
+    "ngrok-like",
+    "private-to-public"
+  ],
+  "dependencies": {
+    "ws": "^7.3.1"
+  },
+  "bin": {
+  	"websocket-reverse-proxy": "./bin/websocket-reverse-proxy"
+  }
+}
