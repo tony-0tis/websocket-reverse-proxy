@@ -1,6 +1,6 @@
 {
   "name": "websocket-reverse-proxy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Reverse-proxy server and client to organize access to a private server through requests to a public server.",
   "main": "index.js",
   "author": "A.I.Developer",
@@ -16,6 +16,6 @@
     "ws": "^7.3.1"
   },
   "bin": {
-  	"websocket-reverse-proxy": "./bin/websocket-reverse-proxy"
+    "websocket-reverse-proxy": "./bin/websocket-reverse-proxy"
   }
 }
