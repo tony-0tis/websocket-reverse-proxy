@@ -6,7 +6,7 @@ Basically does the same thing as [ngrock](https://ngrok.com/), but the server ri
 1. On the remote server, a reverse proxy server is deployed (type=server), which expects a connection from a private (local) server (type=client), as well as requests from users via http protocol. 
 2. A private (local) server (type=client) is deployed on a machine that is not accessible from the global Internet, and which establishes a permanent connection to the remote server (type=server), and when data comes from it, proxies them to the local web server. 
 3. After receiving data from the local server, the private (local) server(type=client) transfers the data to the remote server(type=server), which gives the received data to users.
-![Essence](./websocket-reverse-proxy.svg "Essence")
+![Essence](https://github.com/8ai/websocket-reverse-proxy/raw/master/websocket-reverse-proxy.svg "Essence")
 
 ##Minimal node version
 v11.7.0
