@@ -20,6 +20,7 @@ Basically does the same thing as [ngrock](https://ngrok.com/), but the server ri
 
 # Attention.
 Transmission speed is at least 10 times slower than addressing directly to the local server (process #4).
+
 If there is an `ECDH` key, the speed drops 14 times compared to direct access.
 
 
@@ -70,57 +71,82 @@ require('websocket-reverse-proxy')(config);
 ## All parameters for `config.type='server'`
 ### type
 **Type**: String
+
 **Default value**: server
+
 **Variants**: server/~~client~~
+
 Server type. If **server**, then HTTP server and websocket server on the specified port are started. If the **client**, then the connection to the `remoteServer` is started and waits for data from it, which is then transmitted to the `localServer`, the response from which is returned to the `remoteServer`.
 
 ### port
 **Type**: Number
+
 **Default value**: 1080
+
 The port for starting the server, on which it can be accessed.
 
 ### apikey
 **Type**: String
+
 Authorization key. 
+
 If it is empty or not specified, any websocket client can connect.
 
 ### ECDH
 **Type**: Boolean
+
 **Default value**: false
+
 Enables data encryption with [ECDH](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman)
 
 ### protocol
 **Type**: String
+
 **Default value**: http
+
 **Variants**: http/https
+
 Protocol or interface to start the server.
 
 ### serverOptions
 **Type**: Object
+
 **Default value**: {}
+
 All avaliable options for [http](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener) `protocol` or [https](https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener) `protocol`
 
 ### compress
 **Type**: String
+
 **Default value**: none
+
 **Variants**: brotli/gzip/deflate/none
+
 Type of data compression during transmission.  When turned on, the load on the processor increases and the transfer rate drops.
 
 ### processRequestTimeout
 **Type**: Number
+
 **Default value**: 120000
+
 **Variants**: 0-...
+
 Timeout until request is cancelled. If the number is less than 1, then the request will not have a timeout.
 
 ### colors
 **Type**: Boolean
+
 **Default value**: false
+
 **Variants**: true/false
+
 Enable custom colors for console.log, console.debug, console.error, console.warn, console.info.
 
 ### noConnectionErrorMessage
 **Type**: String
+
 **Default value**: No connection yet.
+
 A message that is displayed if no connection has been established or lost between the client and the server yet.
 
 ------------
@@ -129,33 +155,48 @@ A message that is displayed if no connection has been established or lost betwee
 ## All parameters for `config.type='client'`
 ### type
 **Type**: String
+
 **Default value**: server
+
 **Variants**: client/~~server~~
+
 Client type. If "server", then HTTP server and websocket server on the specified port are started. If the "client", then the connection to the `remoteServer` is started and waits for data from it, which is then transmitted to the `localServer`, the response from which is returned to the `remoteServer`. |
 
 ### apikey
 **Type**: String
+
 Authorization key. 
+
 If it is empty or not specified, any websocket client can connect.
+
 Ignored for `type=client`, if not specified in `type=server`.
 
 ### ECDH
 **Type**: Boolean
+
 **Default value**: false
+
 Enables data encryption with [ECDH](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman)
 
 ### remoteServer
 **Alias**: remote
+
 **Type**: String
+
 The server from which it is necessary to establish a connection via websocket
 
 ### localServer
 **Alias**: local
+
 **Type**: String
+
 The server to which all requests coming from `remoteServer` are proxied
 
 ### colors
 **Type**: Boolean
+
 **Default value**: false
+
 **Variants**: true/false
+
 Enable custom colors for console.log, console.debug, console.error, console.warn, console.info.

@@ -17,5 +17,9 @@
   },
   "bin": {
     "websocket-reverse-proxy": "./bin/websocket-reverse-proxy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/8ai/websocket-reverse-proxy.git"
   }
 }
