@@ -1,14 +1,29 @@
-#websocket-reverse-proxy
+# websocket-reverse-proxy
 Reverse-proxy server and client to organize access to a private server through requests to a public server.
 Basically does the same thing as [ngrock](https://ngrok.com/), but the server rises on your public server.
 
-#Essence
-1. On the remote server, a reverse proxy server is deployed (type=server), which expects a connection from a private (local) server (type=client), as well as requests from users via http protocol. 
-2. A private (local) server (type=client) is deployed on a machine that is not accessible from the global Internet, and which establishes a permanent connection to the remote server (type=server), and when data comes from it, proxies them to the local web server. 
-3. After receiving data from the local server, the private (local) server(type=client) transfers the data to the remote server(type=server), which gives the received data to users.
+# Designations
+- `Public server` - is usually a server accessible from the global Internet, where `#server` is deployed.
+- `Private server/PC` - It is usually a server or personal computer behind a NAT that has no global ip address and where `#client` is deployed.
+- `#server` - `websocket-reverse-proxy` instance with 2 processes: `Process #1` and `Process #2`.
+- `#client` -  `websocket-reverse-proxy` instance with 1 process: `Process #3`.
+- `Process #1` - an HTTP/HTTPS server to which clients from the Internet connect.
+- `Process #2` - websocket server waiting to be connected from `#client` - `Process #3`.
+- `Process #3` - websocket client that connects to `#server` - `Process #2`.
+- `Process #4` - your backend/web server/any process with network service.
+
+# Essence
+1. The (`#server`) has a reverse proxy server that expects(`Process #2`) a connection from a `private server/PC` (`#client` -`Process #3`) as well as requests from users via http/http(`Process #1`). 
+2. A `Private server/PC` (`#client`) is deployed on a machine that is not accessible from the global Internet and that establishes a persistent connection (`Process #3`) to the remote server (`#server` - `Process #2`) from which it expects data to be transmitted to the local server (`Process #4`).
+3. After receiving the data from the local server (`Process #4`), the private server/PC (`#client` - `Process #3`) transmits the data to the public server (`#server` - `Process #2`) which transmits this data to the users, via the HTTP/HTTPS server (`Process #1`), in response to the pending request.
 ![Essence](https://github.com/8ai/websocket-reverse-proxy/raw/master/websocket-reverse-proxy.svg "Essence")
 
-##Minimal node version
+# Attention.
+Transmission speed is at least 10 times slower than addressing directly to the local server (process #4).
+If there is an `ECDH` key, the speed drops 14 times compared to direct access.
+
+
+## Minimal node version
 v11.7.0
 
 ## Install
@@ -20,7 +35,10 @@ or
 yarn add websocket-reverse-proxy
 ```
 
-## Config to start server(vps/vds/shared hosting/cloud computing platform)
+------------
+
+
+## Config to start `#server`
 ```js
 let config = {
 	"type": "server",
@@ -35,7 +53,7 @@ let config = {
 require('websocket-reverse-proxy')(config);
 ```
 
-## Config to start client(ex: home pc)
+## Config to start `#client`
 ```js
 let config = {
 	"type": "client",
@@ -46,22 +64,98 @@ let config = {
 require('websocket-reverse-proxy')(config);
 ```
 
+------------
+
+
 ## All parameters for `config.type='server'`
-| Property | Type | Default  | Variants | Description |
-| ------ | ------ | ------ | ------ | ------ |
-| `type` | String | server | server/~~client~~ | Server type. If "server", then HTTP server and websocket server on the specified port are started. If the "client", then the connection to the `remoteServer` is started and waits for data from it, which is then transmitted to the `localServer`, the response from which is returned to the `remoteServer`. |
-| `protocol` | String | http | http/https | Protocol or interface to start the server.|
-| `serverOptions` | Object | {} | ... | All avaliable options for [http](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener) `protocol` or [https](https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener) `protocol` |
-| `port` | Number | 1080 | ... | The port for starting the server, on which it can be accessed. |
-| `noConnectionErrorMessage` | String | ... | No connection yet. | A message that is displayed if no connection has been established or lost between the client and the server yet. |
-| `compress` | String | brotli | brotli(v11.7.0)/gzip/deflate/none | Type of data compression during transmission. To disable compression, specify "none". |
-| `colors` | Boolean | false | true/false | Enable custom colors for console.log, console.debug, console.error, console.warn, console.info. |
-| `processRequestTimeout` | Number | 120000 | 0-... | Timeout until request is cancelled |
+### type
+**Type**: String
+**Default value**: server
+**Variants**: server/~~client~~
+Server type. If **server**, then HTTP server and websocket server on the specified port are started. If the **client**, then the connection to the `remoteServer` is started and waits for data from it, which is then transmitted to the `localServer`, the response from which is returned to the `remoteServer`.
+
+### port
+**Type**: Number
+**Default value**: 1080
+The port for starting the server, on which it can be accessed.
+
+### apikey
+**Type**: String
+Authorization key. 
+If it is empty or not specified, any websocket client can connect.
+
+### ECDH
+**Type**: Boolean
+**Default value**: false
+Enables data encryption with [ECDH](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman)
+
+### protocol
+**Type**: String
+**Default value**: http
+**Variants**: http/https
+Protocol or interface to start the server.
+
+### serverOptions
+**Type**: Object
+**Default value**: {}
+All avaliable options for [http](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener) `protocol` or [https](https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener) `protocol`
+
+### compress
+**Type**: String
+**Default value**: none
+**Variants**: brotli/gzip/deflate/none
+Type of data compression during transmission.  When turned on, the load on the processor increases and the transfer rate drops.
+
+### processRequestTimeout
+**Type**: Number
+**Default value**: 120000
+**Variants**: 0-...
+Timeout until request is cancelled. If the number is less than 1, then the request will not have a timeout.
+
+### colors
+**Type**: Boolean
+**Default value**: false
+**Variants**: true/false
+Enable custom colors for console.log, console.debug, console.error, console.warn, console.info.
+
+### noConnectionErrorMessage
+**Type**: String
+**Default value**: No connection yet.
+A message that is displayed if no connection has been established or lost between the client and the server yet.
+
+------------
+
 
 ## All parameters for `config.type='client'`
-| Property | Type | Default  | Variants | Description |
-| ------ | ------ | ------ | ------ | ------ |
-| `type` | String | client | client/~~server~~ | Server type. If "server", then HTTP server and websocket server on the specified port are started. If the "client", then the connection to the `remoteServer` is started and waits for data from it, which is then transmitted to the `localServer`, the response from which is returned to the `remoteServer`. |
-| `remoteServer` | String | ... | ... | The server from which it is necessary to establish a connection via websocket |
-| `localServer` | String | ... | ... | The server to which all requests coming from `remoteServer` are proxied |
-| `colors` | Boolean | false | true/false | Enable custom colors for console.log, console.debug, console.error, console.warn, console.info. |
+### type
+**Type**: String
+**Default value**: server
+**Variants**: client/~~server~~
+Client type. If "server", then HTTP server and websocket server on the specified port are started. If the "client", then the connection to the `remoteServer` is started and waits for data from it, which is then transmitted to the `localServer`, the response from which is returned to the `remoteServer`. |
+
+### apikey
+**Type**: String
+Authorization key. 
+If it is empty or not specified, any websocket client can connect.
+Ignored for `type=client`, if not specified in `type=server`.
+
+### ECDH
+**Type**: Boolean
+**Default value**: false
+Enables data encryption with [ECDH](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman)
+
+### remoteServer
+**Alias**: remote
+**Type**: String
+The server from which it is necessary to establish a connection via websocket
+
+### localServer
+**Alias**: local
+**Type**: String
+The server to which all requests coming from `remoteServer` are proxied
+
+### colors
+**Type**: Boolean
+**Default value**: false
+**Variants**: true/false
+Enable custom colors for console.log, console.debug, console.error, console.warn, console.info.
