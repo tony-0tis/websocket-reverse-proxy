@@ -16,7 +16,7 @@
     "ws": "^7.3.1"
   },
   "bin": {
-    "websocket-reverse-proxy": "./bin/websocket-reverse-proxy"
+    "websocket-reverse-proxy": "./bin/websocket-reverse-proxy.js"
   },
   "repository": {
     "type": "git",

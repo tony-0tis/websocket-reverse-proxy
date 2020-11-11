@@ -36,7 +36,9 @@ or
 yarn add websocket-reverse-proxy
 ```
 
+
 ------------
+
 
 
 ## Config to start `#server`
@@ -66,6 +68,21 @@ require('websocket-reverse-proxy')(config);
 ```
 
 ------------
+
+## Running from command line
+To start from the command line, the variable `run=wrp` must be present in the start line.
+
+The other parameters are passed through the space and according to the template `${parameter}=${value}`. Exception: parameters with type Object.
+```bash
+#! via yarn
+yarn run websocket-reverse-proxy run=wrp type=server port=8000 colors=true 
+
+#! via bash file
+./node_modules/.bin/websocket-reverse-proxy run=wrp type=server port=8000 colors=true 
+```
+
+------------
+
 
 
 ## All parameters for `config.type='server'`
@@ -149,7 +166,9 @@ Enable custom colors for console.log, console.debug, console.error, console.warn
 
 A message that is displayed if no connection has been established or lost between the client and the server yet.
 
+
 ------------
+
 
 
 ## All parameters for `config.type='client'`
