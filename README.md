@@ -70,9 +70,7 @@ require('websocket-reverse-proxy')(config);
 ------------
 
 ## Running from command line
-To start from the command line, the variable `run=wrp` must be present in the start line.
-
-The other parameters are passed through the space and according to the template `${parameter}=${value}`. Exception: parameters with type Object.
+All parameters are passed through the space and according to the template `${parameter}=${value}`. Exception: parameters with type Object.
 ```bash
 #! via yarn
 yarn run websocket-reverse-proxy run=wrp type=server port=8000 colors=true 
