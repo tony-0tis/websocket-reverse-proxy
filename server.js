@@ -222,7 +222,7 @@ function iniSocket(socket, config) {
       canceled: false,
       parts: {},
       startCb: start=>response.writeHead(start.code, start.headers),
-      partCb: part=>response.write(part.body),
+      partCb: part=>response.write(part),
       endCb: end=>response.end(),
     };
     if(config.processRequestTimeout > 0){
@@ -256,8 +256,8 @@ function iniSocket(socket, config) {
       else if(config.compress == 'gzip') chunk = zlib.gzipSync(chunk);
       else if(config.compress == 'brotli') chunk = zlib.brotliCompressSync(chunk); 
 
-      console.debug(id, '> 3) Request part', partId);
       let partId = (Math.random()).toString(36);
+      console.debug(id, '> 3) Request part', partId);
       await this.sendWithCheck(partId, {
         type: 'requestPart',
         id: id,
@@ -301,7 +301,7 @@ function iniSocket(socket, config) {
     if(data.body && data.body.type == 'Buffer'){
       data.body = Buffer.from(data.body.data);
     }
-    if(typeof data.body == 'object' && !Object.keys(data.body).length){
+    if(typeof data.body == 'object' && !Object.keys(data.body).length || !data.body){
       data.body = '';
     }
 
@@ -311,7 +311,7 @@ function iniSocket(socket, config) {
 
     console.debug(data.id, '< 10) Part to return:', data.partId);
     
-    this._callbacks[data.id].partCb(data);
+    this._callbacks[data.id].partCb(data.body);
   };
   socket.responseEnd = function(data){
     this.send(JSON.stringify({type: 'responseEndRecieved', id: data.id}));
@@ -332,7 +332,7 @@ function iniSocket(socket, config) {
       if(config.compress == 'deflate') data.body = zlib.inflateSync(data.body);
       else if(config.compress == 'gzip') data.body = zlib.gunzipSync(data.body);
       else if(config.compress == 'brotli') data.body = zlib.brotliDecompressSync(data.body);
-      this._callbacks[data.id].partCb(data);
+      this._callbacks[data.id].partCb(data.body);
     }
 
     console.debug(data.id, '< 12) End to return');

@@ -11,7 +11,7 @@ module.exports = (obj, config)=>{
       return function(...args) {
         if(key == 'debug' && !config.debug) return;
         else if(key == 'debug'){
-          consol.warn('config.debug', !config.debug)
+          console.warn('config.debug', !config.debug)
         }
         
         let date = new Date().toLocaleString();

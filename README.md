@@ -75,7 +75,7 @@ All parameters are passed through the space and according to the template `${par
 #! via yarn
 yarn run websocket-reverse-proxy run=wrp type=server port=8000 colors=true 
 
-#! via bash file
+#! via bash run file
 ./node_modules/.bin/websocket-reverse-proxy run=wrp type=server port=8000 colors=true 
 ```
 

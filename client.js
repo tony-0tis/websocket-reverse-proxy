@@ -175,7 +175,7 @@ function startTonel(config){
       headers: data.headers,
       timeout: 20000
     });
-    this._callbacks[data.id].partCb = part=>request.write(part.body);
+    this._callbacks[data.id].partCb = part=>request.write(part);
     this._callbacks[data.id].endCb = end=>request.end();
     this._callbacks[data.id].destroyRequest = ()=>request.destroy();
     request.on('error', e=>{
@@ -249,7 +249,7 @@ function startTonel(config){
     if(data.body && data.body.type == 'Buffer'){
       data.body = Buffer.from(data.body.data);
     }
-    if(typeof data.body == 'object' && !Object.keys(data.body).length){
+    if(typeof data.body == 'object' && !Object.keys(data.body).length || data.body == undefined){
       data.body = '';
     }
 
