@@ -13,6 +13,19 @@ module.exports = config=>{
   }
 };
 
+module.exports.server = (config, apiKey)=>{
+  if(typeof config === 'number'){
+    config = {port: config, apiKey};
+  }
+  module.exports({...config, ...{type: 'server'}});
+};
+
+module.exports.client = (config, remote, apiKey)=>{
+  if(typeof config !== 'object'){
+    config = {local: config, remote, apiKey};
+  }
+  module.exports({...config, ...{type: 'client'}});
+};
 
 let config = {};
 for(let i=2;i<process.argv.length;i++){

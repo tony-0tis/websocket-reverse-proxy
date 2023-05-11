@@ -55,6 +55,10 @@ let config = {
 };
 require('websocket-reverse-proxy')(config);
 ```
+Or a simple initialization
+```js
+require('websocket-reverse-proxy').server(8080, 'someApiKeyIfNeeded'); //init server on port 8080 with apiKey to prevent connections from non autharized clients
+```
 
 ## Config to start `#client`
 ```js
@@ -65,6 +69,22 @@ let config = {
 	"colors": true
 }
 require('websocket-reverse-proxy')(config);
+```
+Or a simple initialization
+```js
+require('websocket-reverse-proxy').client('http://locahost:80', 'http://example.com:8080', 'someApiKeyIfNeeded'); // initializing the client that connects to the remoteServer and redirects requests from it to the localServer
+```
+
+## Include with ES6 
+```js
+import websocketReverseProxy from 'websocket-reverse-proxy';
+websocketReverseProxy(config);
+// or
+import {server as wsrpServer} from 'websocket-reverse-proxy';
+wsrpServer(port, apiKey);
+// or
+import {server as wsrpClinet} from 'websocket-reverse-proxy';
+wsrpClinet(local, remove, apiKey);
 ```
 
 ------------

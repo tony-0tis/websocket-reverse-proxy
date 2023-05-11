@@ -6,16 +6,14 @@ const crypto = require('crypto');
 const Stream = require('stream');
 const websocket = require('ws');
 
-module.exports = config=>{
+let interval;
+let pings = 0;
+
+module.exports = function startTonel(config){
   require('./colorize')(console, config);
   console.warn('Start client');
-  startTonel(config);
-}
 
-let int;
-let pings = 0;
-function startTonel(config){
-  clearInterval(int);
+  clearInterval(interval);
   let urlData = url.parse(config.localServer || config.local);
   let protocol = urlData.protocol == 'https:' ? https : http;
   let ECDHKey;
@@ -300,12 +298,12 @@ function startTonel(config){
   socket.on('open', ()=>{
     console.log('# Client socket to remote server opened');
 
-    int = setInterval(()=>{
+    interval = setInterval(()=>{
       pings++;
       if(pings >= 3) {
         pings = 0;
         socket.close(1001);
-        clearInterval(int);
+        clearInterval(interval);
         //socket.terminate();
         //startTonel(config);
         return;
@@ -341,7 +339,7 @@ function startTonel(config){
       '1015': 'TLS Handshake'
     };
     console.error('% Client socket closed', 'code:', code, 'reason:', reason, 'message', specificStatusCodeMappings[code]);
-    clearInterval(int);
+    clearInterval(interval);
 
     if(code == 1016) return;
 

@@ -6,6 +6,7 @@ let colors = {
   warn: 33
 };
 module.exports = (obj, config)=>{
+  if(obj._colorized) return;
   for(let key in colors){
     obj[key] = (original=>{
       return function(...args) {
@@ -24,4 +25,5 @@ module.exports = (obj, config)=>{
       }
     })(obj[key]);
   }
+  obj._colorized = true;
 }
