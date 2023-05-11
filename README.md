@@ -3,19 +3,17 @@ Reverse-proxy server and client to organize access to a private server through r
 Basically does the same thing as [ngrock](https://ngrok.com/), but the server rises on your public server.
 
 # Designations
-- `Public server` - is usually a server accessible from the global Internet, where `#server` is deployed.
-- `Private server/PC` - It is usually a server or personal computer behind a NAT that has no global ip address and where `#client` is deployed.
-- `#server` - `websocket-reverse-proxy` instance with 2 processes: `Process #1` and `Process #2`.
-- `#client` -  `websocket-reverse-proxy` instance with 1 process: `Process #3`.
+- A `Public server` is usually a server accessible from the global Internet that is running `#server`.
+- `Private server/home PC` - Usually a server or personal computer behind a NAT that has no global IP address and is running `#client`.
 - `Process #1` - an HTTP/HTTPS server to which clients from the Internet connect.
-- `Process #2` - websocket server waiting to be connected from `#client` - `Process #3`.
-- `Process #3` - websocket client that connects to `#server` - `Process #2`.
+- `Process #2`(`#server`) - websocket server waiting to be connected from `#client` - `Process #3`.
+- `Process #3`(`#client`) - websocket client that connects to `#server` - `Process #2`.
 - `Process #4` - your backend/web server/any process with network service.
 
 # Essence
-1. The (`#server`) has a reverse proxy server that expects(`Process #2`) a connection from a `private server/PC` (`#client` -`Process #3`) as well as requests from users via http/http(`Process #1`). 
-2. A `Private server/PC` (`#client`) is deployed on a machine that is not accessible from the global Internet and that establishes a persistent connection (`Process #3`) to the remote server (`#server` - `Process #2`) from which it expects data to be transmitted to the local server (`Process #4`).
-3. After receiving the data from the local server (`Process #4`), the private server/PC (`#client` - `Process #3`) transmits the data to the public server (`#server` - `Process #2`) which transmits this data to the users, via the HTTP/HTTPS server (`Process #1`), in response to the pending request.
+1. The `#server` runs a reverse proxy that accepts (`Process #2`) connections from the `private server/home PC` (`#client` - `Process #3`) as well as http/http requests from users from the public server (`Process #1`).
+2. The `Private Server/Home PC` (`#client`) runs on a machine that is inaccessible from the global Internet, and establishes a persistent connection (`process #3`) to a remote server (`#server` - `process #2`) from which it waits to transmit data to the local server (`Process #4`).
+3. Client requests come to the public server - `Process #1`, which proxies to `Process #2`(`#server`). `Process #2`(`#server`) in turn proxies the requests to `Process #3`(`#client`). Process #3(`#client`) in turn proxies requests to `Process #4`. After receiving data from the local server - `Process #4`, `Process #3`(`#client`) transmits data to `Process #2`(`#server`), which in turn transmits that data to users, via the HTTP/HTTPS server (`Process #1`), in response to a pending request.
 ![Essence](https://github.com/8ai/websocket-reverse-proxy/raw/master/websocket-reverse-proxy.svg "Essence")
 
 # Attention.
