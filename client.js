@@ -6,21 +6,26 @@ const crypto = require('crypto');
 const Stream = require('stream');
 const websocket = require('ws');
 
+
 let interval;
 let pings = 0;
 
-module.exports = function startTonel(config){
+module.exports = config=>{
   require('./colorize')(console, config);
   console.warn('Start client');
+  startTonel(config);
+}
 
+function startTonel(config){
   clearInterval(interval);
+
   let urlData = url.parse(config.localServer || config.local);
   let protocol = urlData.protocol == 'https:' ? https : http;
   let ECDHKey;
   let ECDHSecret;
 
-  let socket = new websocket(config.remoteServer || config.remote);
   console.log('Open socket client connection:', (config.remoteServer || config.remote));
+  let socket = new websocket(config.remoteServer || config.remote);
   socket.on('message', data=>{
     try{
       data = JSON.parse(data);
@@ -28,8 +33,10 @@ module.exports = function startTonel(config){
 
     if(data.type == 'secret' && ECDHSecret){
       let cipher = crypto.createDecipheriv('aes-192-cbc', ECDHSecret.slice(0,24), new Uint8Array(data.iv_key));
+      
       data = cipher.update(data.data, 'base64', 'utf8');
       data += cipher.final('utf8');
+      
       try{
         data = JSON.parse(data);
       }catch(e){}
@@ -40,7 +47,9 @@ module.exports = function startTonel(config){
         ECDHKey = crypto.createECDH('secp521r1');
         socket.send(JSON.stringify({type: 'ECDH', keys: ECDHKey.generateKeys()}));
       }
+      
       ECDHSecret = ECDHKey.computeSecret(Buffer.from(data.keys.data));
+      
       return;
     }
 
@@ -56,6 +65,7 @@ module.exports = function startTonel(config){
 
     if(data.type == 'auth' && config.apikey){
       socket.send(JSON.stringify({type: 'auth', apikey: config.apikey}));
+      
       return;
     }
 
@@ -67,6 +77,7 @@ module.exports = function startTonel(config){
       console.debug(data.id, '< 7.1) responseStartRecieved');
 
       socket._callbacks[data.id].parts['start'].next();
+      
       return;
     }
     if(data.type == 'responsePartRecieved'){
@@ -77,6 +88,7 @@ module.exports = function startTonel(config){
       console.debug(data.id, '< 9.1) responsePartRecieved');
 
       socket._callbacks[data.id].parts[data.partId].next();
+      
       return;
     }
     if(data.type == 'responseEndRecieved'){
@@ -87,24 +99,29 @@ module.exports = function startTonel(config){
       console.debug(data.id, '< 11.1) responseEndRecieved');
 
       socket._callbacks[data.id].parts['end'].next();
+
       return;
     }
 
     if(data.type == 'cancelResponse'){
       socket.cancelResponse(data);
+
       return;
     }
     
     if(data.type == 'requestStart'){
       socket.requestStart(data);
+
       return;
     }
     if(data.type == 'requestPart'){
       socket.requestPart(data);
+
       return;
     }
     if(data.type == 'requestEnd'){
       socket.requestEnd(data);
+
       return;
     }
 
@@ -117,6 +134,7 @@ module.exports = function startTonel(config){
       if(ECDHSecret){
         let iv_key = crypto.randomFillSync(new Uint8Array(16));
         let cipher = crypto.createCipheriv('aes-192-cbc', ECDHSecret.slice(0,24), iv_key);
+        
         data = {
           type: 'secret',
           iv_key: Array.from(iv_key),
@@ -136,7 +154,9 @@ module.exports = function startTonel(config){
         next(){
           clearInterval(this.si);
           delete socket._callbacks[data.id].parts[partId];
+          
           next && next();
+          
           ok();
         },
         si: setInterval(()=>{
@@ -155,6 +175,7 @@ module.exports = function startTonel(config){
       this.send(JSON.stringify(data));
     });
   };
+
   socket.requestStart = async function(data){
     this.send(JSON.stringify({type: 'requestStartRecieved', id: data.id}));
 
@@ -173,9 +194,11 @@ module.exports = function startTonel(config){
       headers: data.headers,
       timeout: 20000
     });
-    this._callbacks[data.id].partCb = part=>request.write(part);
-    this._callbacks[data.id].endCb = end=>request.end();
-    this._callbacks[data.id].destroyRequest = ()=>request.destroy();
+
+    this._callbacks[data.id].partCb = part => request.write(part);
+    this._callbacks[data.id].endCb = end => request.end();
+    this._callbacks[data.id].destroyRequest = () => request.destroy();
+    
     request.on('error', e=>{
       console.error('% Request err', e, data.url);
     });
@@ -183,7 +206,9 @@ module.exports = function startTonel(config){
     let response = await new Promise((ok, bad)=>{
        request.on('response', resp=>ok(resp));
     });
+    
     if(!this._callbacks[data.id]) return;
+    
     this._callbacks[data.id].destroyResponse = ()=>response.destroy();
 
     response.pause();
@@ -206,12 +231,19 @@ module.exports = function startTonel(config){
 
       response.pause();
 
-      if(this._callbacks[data.id].compress == 'deflate') chunk = zlib.deflateSync(chunk);
-      else if(this._callbacks[data.id].compress == 'gzip') chunk = zlib.gzipSync(chunk);
-      else if(this._callbacks[data.id].compress == 'brotli') chunk = zlib.brotliCompressSync(chunk);
+      if(this._callbacks[data.id].compress == 'deflate') {
+        chunk = zlib.deflateSync(chunk);
+      }
+      else if(this._callbacks[data.id].compress == 'gzip'){
+        chunk = zlib.gzipSync(chunk);
+      }
+      else if(this._callbacks[data.id].compress == 'brotli'){
+        chunk = zlib.brotliCompressSync(chunk);
+      }
 
       console.debug(data.id, '> 9) response part');
       let partId = (Math.random()).toString(36);
+      
       await this.sendWithCheck(partId, {
         type: 'responsePart',
         id: data.id,
@@ -247,13 +279,20 @@ module.exports = function startTonel(config){
     if(data.body && data.body.type == 'Buffer'){
       data.body = Buffer.from(data.body.data);
     }
-    if(typeof data.body == 'object' && !Object.keys(data.body).length || data.body == undefined){
+
+    if(typeof data.body == 'object' && !Object.keys(data.body).length){
       data.body = '';
     }
 
-    if(this._callbacks[data.id].compress == 'deflate') data.body = zlib.inflateSync(data.body);
-    else if(this._callbacks[data.id].compress == 'gzip') data.body = zlib.gunzipSync(data.body);
-    else if(this._callbacks[data.id].compress == 'brotli') data.body = zlib.brotliDecompressSync(data.body);
+    if(this._callbacks[data.id].compress == 'deflate') {
+      data.body = zlib.inflateSync(data.body);
+    }
+    else if(this._callbacks[data.id].compress == 'gzip'){
+      data.body = zlib.gunzipSync(data.body);
+    }
+    else if(this._callbacks[data.id].compress == 'brotli'){
+      data.body = zlib.brotliDecompressSync(data.body);
+    }
 
     console.debug(data.id, '> 4) requestPart send', data.partId);
 
@@ -308,17 +347,21 @@ module.exports = function startTonel(config){
         //startTonel(config);
         return;
       }
+
       socket.ping();
       //socket.send(JSON.stringify({type: 'ping'}));
     }, 1000);
   });
+
   socket.on('pong', data=>{
     // console.log('pong');
     pings--;
   });
+
   socket.on('error', e=>{
     console.error('% Client socket error', e);
   });
+
   socket.on('close', (code, reason)=>{
     let specificStatusCodeMappings = {
       '1000': 'Normal Closure',
@@ -338,6 +381,7 @@ module.exports = function startTonel(config){
       '1014': 'Bad Gateway',
       '1015': 'TLS Handshake'
     };
+
     console.error('% Client socket closed', 'code:', code, 'reason:', reason, 'message', specificStatusCodeMappings[code]);
     clearInterval(interval);
 
@@ -353,8 +397,8 @@ module.exports = function startTonel(config){
       startTonel(config);
     }, 50);
   });
+
   socket.on('unexpected-response', (req, res)=>{
     console.error(req, res);
   });
-
 }
