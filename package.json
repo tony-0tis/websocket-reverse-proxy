@@ -1,6 +1,6 @@
 {
   "name": "websocket-reverse-proxy",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Reverse-proxy server and client to organize access to a private server through requests to a public server.",
   "main": "index.js",
   "author": "A.I.Developer",
@@ -23,6 +23,7 @@
     "url": "git+https://github.com/tony-0tis/websocket-reverse-proxy.git"
   },
   "scripts": {
+    "patch": "yarn version --patch",
     "postversion": "git push && git push --tags && npm publish"
   }
 }
